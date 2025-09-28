@@ -51,9 +51,13 @@
 
     <div class="container mx-auto p-4 md:p-8">
 
-        <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold font-arima text-emerald-800">நாமக்கல் கவிஞர் பாடல்கள்</h1>
-            <p class="text-lg md:text-xl text-stone-600 mt-2">"காந்தியக் கவிஞர்" வெ. இராமலிங்கம் பிள்ளை</p>
+        <header class="flex items-center justify-between mb-8">
+            <img src="logo.png" alt="நாமக்கல் கவிஞர் Logo" class="h-16 w-16 rounded-full object-cover">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold font-arima text-emerald-800">நாமக்கல் கவிஞர் பாடல்கள்</h1>
+                <p class="text-lg md:text-xl text-stone-600 mt-2">"காந்தியக் கவிஞர்" வெ. இராமலிங்கம் பிள்ளை</p>
+            </div>
+             <div class="w-16 h-16"></div> <!-- Placeholder to balance the logo and keep the title centered -->
         </header>
 
         <main>
@@ -154,7 +158,22 @@
 அவன் எழுதிய விதியை தன் கையாலே திருத்த
 முடிந்திடக் கண்டானோ?`
             },
-            { tamil: 'கடவுள் இல்லாத காலம்', tanglish: 'Kadavul Illaatha Kaalam', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'கடவுள் இல்லாத காலம்', tanglish: 'Kadavul Illaatha Kaalam', category: 'தெய்வத் திருமலர்', lyrics: `கடவுள் இல்லாத காலமில்லை 
+இருக்கின்ற பொருள் ஒன்றில்லை
+எண்ணாத எண்ணமெல்லாம்
+எண்ணியும் எட்டவில்லை
+சொல்லாத வேதமெல்லாம்
+சொல்லியும் சொன்னதில்லை
+சூட்டாத நாமம் இல்லை
+தோன்றாத உருவமில்லை
+
+அல்லாவாய் புத்தனாகி
+அரனரி பிரம்மனாகி
+அருளுடைச் சமணர்தேவும்
+அன்புள்ள கிறிஸ்துவாகி
+கல்லாத மனத்தில்கூட
+காணாமல் இருப்பாரந்த
+கடவுளென்று உலகம் போற்றும்.` },
             { tamil: 'இறைவன் அன்பினுக்கு', tanglish: 'Iraivan Anbinukku', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
             { tamil: 'எங்கும் நிறைபொருள்', tanglish: 'Engum Niraipporul', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
             { tamil: 'சித்தமும் பொருளும்', tanglish: 'Siththamum Porulum', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
@@ -271,9 +290,15 @@
                 const category = song.category;
                 const color = categoryColors[category] || '#9ca3af';
 
+                const hasLyrics = song.lyrics !== 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...';
+                const dotClass = hasLyrics ? 'bg-green-500' : 'bg-red-500';
+
                 card.innerHTML = `
                     <div>
-                        <h3 class="text-lg font-bold text-stone-800">${title}</h3>
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-lg font-bold text-stone-800 pr-2">${title}</h3>
+                            <span class="w-2.5 h-2.5 ${dotClass} rounded-full mt-1.5 flex-shrink-0" title="${hasLyrics ? 'பாடல் வரிகள் உள்ளன' : 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்'}"></span>
+                        </div>
                     </div>
                     <div class="mt-3">
                         <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full" style="color: ${color}; background-color: ${color}20;">
@@ -402,4 +427,6 @@
     </script>
 </body>
 </html>
+
+
 
