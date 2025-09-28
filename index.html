@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>நாமக்கல் கவிஞர் பாடல்கள்</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arima:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is designed as a single-page interactive dashboard. The core structure features a header for identity, an introduction for context, a control panel with filters and a search bar for user interaction, a data visualization (doughnut chart) to provide a thematic overview, and a dynamic grid to display the songs. This structure was chosen to allow users to easily explore the vast collection of songs non-linearly. Users can either get a broad overview from the chart, filter by a specific theme they are interested in, or search directly for a song, making the content highly accessible and user-friendly. A language toggle between Tamil and Tanglish is included to meet the specific request. -->
+    <!-- Visualization & Content Choices: 
+    - Report Info: A categorized list of Namakkal Kavignar's songs. Goal: Organize & Explore. Presentation: A filterable, searchable grid of song cards. Interaction: Users can click category buttons or use a search bar to dynamically filter the song list. The language can be toggled. Justification: This provides multiple, intuitive pathways for users to discover the songs.
+    - Report Info: The thematic categories of the songs. Goal: Inform & Summarize. Viz/Presentation Method: Doughnut Chart. Interaction: The chart visually represents the proportion of songs in each category, offering an immediate understanding of the poet's thematic focus. It serves as a visual navigation aid. Justification: A chart is more engaging than a simple list of categories and provides a quick quantitative summary.
+    - Library/Method: Vanilla JavaScript for all logic, Tailwind CSS for styling, and Chart.js (Canvas) for visualization. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans Tamil', sans-serif;
+            background-color: #fdfbf5;
+        }
+        .font-arima {
+            font-family: 'Arima', cursive;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #059669;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #059669;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold font-arima text-emerald-800">நாமக்கல் கவிஞர் பாடல்கள்</h1>
+            <p class="text-lg md:text-xl text-stone-600 mt-2">"காந்தியக் கவிஞர்" வெ. இராமலிங்கம் பிள்ளை</p>
+        </header>
+
+        <main>
+            <section id="introduction" class="max-w-4xl mx-auto bg-white/60 p-6 rounded-2xl shadow-sm mb-8">
+                <p class="text-base md:text-lg text-center leading-relaxed">
+                    "காந்தியக் கவிஞர்" என்று போற்றப்படும் நாமக்கல் கவிஞர் வெ. இராமலிங்கம் பிள்ளை, எண்ணற்றப் பாடல்களை இயற்றியுள்ளார். அவரின் பாடல்கள் தேசபக்தி, காந்தியம், சமூக சீர்திருத்தம், கடவுள் பக்தி, தமிழ் மொழிப் பற்று எனப் பலதரப்பட்ட கருத்துக்களை உள்ளடக்கமாகக் கொண்டுள்ளன. இந்த ஊடாடும் தளம் அவரின் படைப்புகளை எளிதாகக் கண்டறியவும், வகை வாரியாகப் ஆராயவும் உதவுகிறது.
+                </p>
+            </section>
+            
+            <section id="controls" class="mb-8 p-4 bg-white/60 rounded-2xl shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    <input type="text" id="search-input" placeholder="பாடலைத் தேடவும் (தமிழ் / Tanglish)..." class="w-full md:w-1/3 px-4 py-2 border border-stone-300 rounded-full focus:ring-2 focus:ring-emerald-500 focus:outline-none transition">
+                    
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-medium text-stone-700">தமிழ்</span>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="language-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                            <label for="language-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-stone-300 cursor-pointer"></label>
+                        </div>
+                        <span class="text-sm font-medium text-stone-700">Tanglish</span>
+                    </div>
+                </div>
+
+                <div id="filter-buttons" class="flex flex-wrap justify-center gap-2">
+                </div>
+            </section>
+
+            <section id="visualization" class="mb-12">
+                 <div class="chart-container">
+                    <canvas id="songsChart"></canvas>
+                </div>
+            </section>
+
+            <section id="songs-list">
+                <div id="songs-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 py-4 border-t border-stone-200">
+            <p class="text-stone-500 text-sm">நாமக்கல் கவிஞரின் படைப்புகளைக் கொண்டாடும் ஒரு முயற்சி.</p>
+        </footer>
+    </div>
+
+    <div id="song-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4 transition-opacity duration-300">
+        <div id="modal-content" class="bg-white rounded-2xl shadow-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h2 id="modal-title" class="text-2xl font-bold font-arima text-emerald-800"></h2>
+                <button id="modal-close-btn" class="text-stone-500 hover:text-stone-800 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="modal-lyrics" class="text-stone-700 whitespace-pre-wrap leading-loose text-base">
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const songs = [
+            { 
+                tamil: 'உலகெலாம் படைத்து', 
+                tanglish: 'Ulagelaam Padaithu', 
+                category: 'தெய்வத் திருமலர்', 
+                lyrics: `பாடல்: உலகெலாம் படைத்து
+இசை: இளையராஜா
+பாடியவர்: மலேசியா வாசுதேவன்
+திரைப்படம்: பூவிழி வாசலிலே (1987)
+
+உலகெலாம் படைத்து பிரம்மனும் தொலைத்து
+வழி தேடிப் போனானோ?
+அவன் எழுதிய விதியை தன் கையாலே திருத்த
+முடிந்திடக் கண்டானோ?
+
+சுகம் வேண்டித் தவம் இருந்தேன்
+சொர்க்கத்தின் வாசல் வரை
+திறந்த பின்னும் புக முடியாமல் தவிக்கின்றேன்
+நரகமும் சொர்க்கமும் வேறெங்கோ நான் எண்ணினேன்
+அது இரண்டும் இங்குதான் இருப்பதை நான் கண்டேன்
+தலை எழுத்தை மாற்றும் சக்தி பிரம்மனுக்கில்லையே
+விதி என்னும் நூலில் ஆடும் பொம்மைகள் அல்லவா நாம்?
+
+உலகெலாம் படைத்து பிரம்மனும் தொலைத்து
+வழி தேடிப் போனானோ?
+அவன் எழுதிய விதியை தன் கையாலே திருத்த
+முடிந்திடக் கண்டானோ?
+
+மழை நீரும் கண்ணீரும் உப்பானது ఏனோ?
+ஒரு வேதம் சொல்லாத பாடம் இதுதானோ?
+விதை ஒன்று போட்டால் செடி ஒன்று முளைக்கும்
+செடி ஒன்று வைத்தால் இலை ஒன்று துளிர்க்கும்
+காலங்கள் மாறும் கோலங்கள் மாறும்
+நடந்ததை மறப்போம் வருபவை ஏற்போம்
+தலை எழுத்தை மாற்றும் சக்தி பிரம்மனுக்கில்லையே
+விதி என்னும் நூலில் ஆடும் பொம்மைகள் அல்லவா நாம்?
+
+உலகெலாம் படைத்து பிரம்மனும் தொலைத்து
+வழி தேடிப் போனானோ?
+அவன் எழுதிய விதியை தன் கையாலே திருத்த
+முடிந்திடக் கண்டானோ?`
+            },
+            { tamil: 'கடவுள் இல்லாத காலம்', tanglish: 'Kadavul Illaatha Kaalam', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'இறைவன் அன்பினுக்கு', tanglish: 'Iraivan Anbinukku', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'எங்கும் நிறைபொருள்', tanglish: 'Engum Niraipporul', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'சித்தமும் பொருளும்', tanglish: 'Siththamum Porulum', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தத்துவப் பற்று', tanglish: 'Thaththuvap Pattru', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தெய்வத்தின் பேதங்கள்', tanglish: 'Theyvaththin Pethangal', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தெய்வப் பற்று', tanglish: 'Theyvap Pattru', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தெய்வ நிச்சயம்', tanglish: 'Theyva Nichchayam', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தெய்வப் பிரார்த்தனை', tanglish: 'Theyvap Pirarththanai', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தெய்வ மணமாலை', tanglish: 'Theyva Manamaalai', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'திருச்செங்கோட்டு முருகன்', tanglish: 'Thiruchengottu Murugan', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'முருகன் பெருமை', tanglish: 'Murugan Perumai', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'முருகன் அல்லது அழகு', tanglish: 'Murugan Allathu Azhagu', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'கண்ணன் பாட்டு', tanglish: 'Kannan Paattu', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'கண்ணன் என் காதலன்', tanglish: 'Kannan En Kaathalan', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'திருவரங்கன் மாலை', tanglish: 'Thiruvarangan Maalai', category: 'தெய்வத் திருமலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { 
+                tamil: 'கத்தியின்றி ரத்தமின்றி', 
+                tanglish: 'Kathiyindri Raththamindri', 
+                category: 'தேசீய மலர்', 
+                lyrics: `கத்தியின்றி ரத்தமின்றி யுத்தமொன்று வருகுது
+சத்தியத்தின் நித்தியத்தை நம்பும்யாரும் சேருவீர்!
+
+கண்டதில்லை கேட்டதில்லை சண்டையிந்த மாதிரி
+பண்டுசெய்த புண்ணியந்தான் பலித்ததேநாம் பார்த்திட!
+
+காந்தியென்ற சாந்தமூர்த்தி தேர்ந்து காட்டும் செந்நெறி
+மாந்தருக்குள் தீமைகுன்றி நன்மைசெய்யும் நன்னெறி!
+
+போனயுகம் போனயுகம் நம்மில்யாரும் சேருவீர்
+காணும்இந்த நல்லயுகம் காணவந்தோம் வாருமே!` 
+            },
+            { tamil: 'தமிழன் என்று சொல்லடா', tanglish: 'Thamizhan Endru Sollada', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'இந்திய நாடிது என்னுடைய நாடே', tanglish: 'Inthiya Naadithu Ennudaiya Naade', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'ஆடு ராட்டே', tanglish: 'Aadu Raatte', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'சுதந்திர தேவி', tanglish: 'Suthanthira Thevi', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'கொடி பறக்குது', tanglish: 'Kodi Parakkuthu', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'பாரத மாதா நவரத்தினமாலை', tanglish: 'Paaratha Maathaa Navarathinamaalai', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'காந்தி அஞ்சலி', tanglish: 'Gandhi Anjali', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'காந்தியைக் காண்போம்', tanglish: 'Ganthiyaik Kaanpom', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'காந்தித் தொண்டர்', tanglish: 'Ganthith Thondar', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'உப்புச் சத்தியாக்கிரகப் பாடல்', tanglish: 'Uppuch Saththiyaakkiragap Paadal', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'வீர சுதந்திரம் வேண்டி', tanglish: 'Veera Suthanthiram Vendi', category: 'தேசீய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'பாட்டாளி மக்களது பசிதீர வேண்டும்', tanglish: 'Paattaali Makkalathu Pasitheera Vendum', category: 'சமுதாய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'கூட்டுறவில் சேருங்கள்', tanglish: 'Kootturavil Serungal', category: 'சமுதாய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'கைத்தொழில் ஒன்றைக் கற்றுக்கொள்', tanglish: 'Kaiththozhil Ondraik Kattrukkol', category: 'சமுதாய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'பெண்கள் விடுதலை', tanglish: 'Pengal Viduthalai', category: 'சமுதாய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தீண்டாமை ஒழிக', tanglish: 'Theendaamai Ozhiga', category: 'சமுதாய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'கல்விச் செல்வம்', tanglish: 'Kalvich Selvam', category: 'சமுதாய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'சமத்துவம்', tanglish: 'Samaththuvam', category: 'சமுதாய மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தமிழன் இதயம்', tanglish: 'Thamizhan Ithayam', category: 'தமிழ்த் தேன் மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'எங்கள் தமிழ்', tanglish: 'Engal Tamil', category: 'தமிழ்த் தேன் மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தமிழ்த்தாய் வாழ்த்து', tanglish: 'Thamizhththaai Vaazhththu', category: 'தமிழ்த் தேன் மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'செந்தமிழ் நாடு', tanglish: 'Senthamizh Naadu', category: 'தமிழ்த் தேன் மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'தமிழன்னை', tanglish: 'Thamizhannai', category: 'தமிழ்த் தேன் மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'திருவள்ளுவர், கம்பர், இளங்கோவடிகள் போற்றுதல்', tanglish: 'Thiruvalluvar, Kambar, Ilangovadigal Potruthal', category: 'பெரியோர் புகழ் மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'பொங்கல், புத்தாண்டு பாடல்கள்', tanglish: 'Pongal, Puththaandu Paadalkal', category: 'திருநாள் மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'அறநெறிப் பாடல்கள்', tanglish: 'Aranerip Paadalkal', category: 'அறிவுரை மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'இசைப் பாடல்கள்', tanglish: 'Isaip Paadalkal', category: 'இசை மலர்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' },
+            { tamil: 'மலைக்கள்ளன் படப்பாடல்கள்', tanglish: 'Malaikkallan Padappaadalkal', category: 'திரைப்படப் பாடல்கள்', lyrics: 'பாடல் வரிகள் விரைவில் சேர்க்கப்படும்...' }
+        ];
+
+        const songsGrid = document.getElementById('songs-grid');
+        const searchInput = document.getElementById('search-input');
+        const languageToggle = document.getElementById('language-toggle');
+        const filterButtonsContainer = document.getElementById('filter-buttons');
+        const songModal = document.getElementById('song-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalLyrics = document.getElementById('modal-lyrics');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        let currentFilter = 'அனைத்தும்';
+        let useTanglish = false;
+        
+        const categories = ['அனைத்தும்', ...new Set(songs.map(song => song.category))];
+        const categoryColors = {
+            'தெய்வத் திருமலர்': '#34d399', 
+            'தேசீய மலர்': '#fb923c', 
+            'சமுதாய மலர்': '#60a5fa', 
+            'தமிழ்த் தேன் மலர்': '#f87171',
+            'பெரியோர் புகழ் மலர்': '#c084fc',
+            'திருநாள் மலர்': '#facc15',
+            'அறிவுரை மலர்': '#9ca3af',
+            'இசை மலர்': '#fb7185',
+            'திரைப்படப் பாடல்கள்': '#5eead4'
+        };
+
+        function renderSongs() {
+            const searchTerm = searchInput.value.toLowerCase();
+            let filteredSongs = songs;
+
+            if (currentFilter !== 'அனைத்தும்') {
+                filteredSongs = filteredSongs.filter(song => song.category === currentFilter);
+            }
+
+            if (searchTerm) {
+                filteredSongs = filteredSongs.filter(song =>
+                    song.tamil.toLowerCase().includes(searchTerm) ||
+                    song.tanglish.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            songsGrid.innerHTML = '';
+            if (filteredSongs.length === 0) {
+                songsGrid.innerHTML = `<p class="text-stone-500 col-span-full text-center">தேடலுக்குப் பொருத்தமான பாடல்கள் எதுவும் இல்லை.</p>`;
+                return;
+            }
+            
+            filteredSongs.forEach(song => {
+                const songIndex = songs.findIndex(s => s.tamil === song.tamil);
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer';
+                const title = useTanglish ? song.tanglish : song.tamil;
+                const category = song.category;
+                const color = categoryColors[category] || '#9ca3af';
+
+                card.innerHTML = `
+                    <div>
+                        <h3 class="text-lg font-bold text-stone-800">${title}</h3>
+                    </div>
+                    <div class="mt-3">
+                        <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full" style="color: ${color}; background-color: ${color}20;">
+                            ${category}
+                        </span>
+                    </div>
+                `;
+                card.addEventListener('click', () => showSongModal(songIndex));
+                songsGrid.appendChild(card);
+            });
+        }
+
+        function setupFilters() {
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.dataset.category = category;
+                button.className = 'px-4 py-2 text-sm font-medium rounded-full transition-colors duration-200';
+                if (category === currentFilter) {
+                    button.classList.add('bg-emerald-600', 'text-white', 'shadow');
+                } else {
+                    button.classList.add('bg-white', 'text-emerald-700', 'hover:bg-emerald-100');
+                }
+                button.onclick = () => {
+                    currentFilter = category;
+                    document.querySelectorAll('#filter-buttons button').forEach(btn => {
+                        btn.classList.remove('bg-emerald-600', 'text-white', 'shadow');
+                        btn.classList.add('bg-white', 'text-emerald-700', 'hover:bg-emerald-100');
+                    });
+                    button.classList.add('bg-emerald-600', 'text-white', 'shadow');
+                    button.classList.remove('bg-white', 'text-emerald-700', 'hover:bg-emerald-100');
+                    renderSongs();
+                };
+                filterButtonsContainer.appendChild(button);
+            });
+        }
+
+        function setupChart() {
+            const ctx = document.getElementById('songsChart').getContext('2d');
+            const categoryCounts = songs.reduce((acc, song) => {
+                acc[song.category] = (acc[song.category] || 0) + 1;
+                return acc;
+            }, {});
+
+            const labels = Object.keys(categoryCounts);
+            const data = Object.values(categoryCounts);
+            const backgroundColors = labels.map(label => categoryColors[label] || '#9ca3af');
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'பாடல்களின் எண்ணிக்கை',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: '#fdfbf5',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Noto Sans Tamil', sans-serif"
+                                },
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                             bodyFont: {
+                                family: "'Noto Sans Tamil', sans-serif"
+                            },
+                            titleFont: {
+                                family: "'Noto Sans Tamil', sans-serif"
+                            },
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        function showSongModal(index) {
+            const song = songs[index];
+            modalTitle.textContent = useTanglish ? song.tanglish : song.tamil;
+            modalLyrics.textContent = song.lyrics;
+            songModal.classList.remove('hidden');
+            setTimeout(() => {
+                songModal.classList.add('opacity-100');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function hideSongModal() {
+            songModal.classList.remove('opacity-100');
+            modalContent.classList.remove('scale-100');
+             setTimeout(() => {
+                songModal.classList.add('hidden');
+            }, 300);
+        }
+
+        modalCloseBtn.addEventListener('click', hideSongModal);
+        songModal.addEventListener('click', (e) => {
+            if (e.target === songModal) {
+                hideSongModal();
+            }
+        });
+        
+        searchInput.addEventListener('input', renderSongs);
+        languageToggle.addEventListener('change', (e) => {
+            useTanglish = e.target.checked;
+            renderSongs();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFilters();
+            renderSongs();
+            setupChart();
+        });
+    </script>
+</body>
+</html>
+
